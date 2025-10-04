@@ -1,19 +1,19 @@
 substitutions:
   # Phases of the Voice Assistant
   # The voice assistant is ready to be triggered by a wake word
-  voice_assist_idle_phase_id: '1'
+  voice_assist_idle_phase_id: "1"
   # The voice assistant is waiting for a voice command (after being triggered by the wake word)
-  voice_assist_waiting_for_command_phase_id: '2'
+  voice_assist_waiting_for_command_phase_id: "2"
   # The voice assistant is listening for a voice command
-  voice_assist_listening_for_command_phase_id: '3'
+  voice_assist_listening_for_command_phase_id: "3"
   # The voice assistant is currently processing the command
-  voice_assist_thinking_phase_id: '4'
+  voice_assist_thinking_phase_id: "4"
   # The voice assistant is replying to the command
-  voice_assist_replying_phase_id: '5'
+  voice_assist_replying_phase_id: "5"
   # The voice assistant is not ready
-  voice_assist_not_ready_phase_id: '10'
+  voice_assist_not_ready_phase_id: "10"
   # The voice assistant encountered an error
-  voice_assist_error_phase_id: '11'
+  voice_assist_error_phase_id: "11"
   # Change this to true in case you ahve a hidden SSID at home.
   hidden_ssid: "false"
   # Substitutions for audio files
@@ -72,7 +72,7 @@ esp32:
       CONFIG_BT_BLE_DYNAMIC_ENV_MEMORY: "y"
 
       CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
-      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"  # TLS1.3 support isn't enabled by default in IDF 5.1.5
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y" # TLS1.3 support isn't enabled by default in IDF 5.1.5
 
 wifi:
   id: wifi_id
@@ -89,7 +89,7 @@ network:
 logger:
   level: DEBUG
   logs:
-    sensor: WARN  # avoids logging debug sensor updates
+    sensor: WARN # avoids logging debug sensor updates
 
 api:
   id: api_id
@@ -118,17 +118,17 @@ globals:
   - id: global_led_animation_index
     type: int
     restore_value: no
-    initial_value: '0'
+    initial_value: "0"
   # Global initialization variable. Initialized to true and set to false once everything is connected. Only used to have a smooth "plugging" experience
   - id: init_in_progress
     type: bool
     restore_value: no
-    initial_value: 'true'
+    initial_value: "true"
   # Global variable storing the state of ImprovBLE. Used to draw different LED animations
   - id: improv_ble_in_progress
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
   # Global variable tracking the phase of the voice assistant (defined above). Initialized to not_ready
   - id: voice_assistant_phase
     type: int
@@ -138,22 +138,22 @@ globals:
   - id: dial_touched
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
   # Global variable tracking if the LED color was recently changed.
   - id: color_changed
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
   # Global variable tracking if the jack has been plugged touched.
   - id: jack_plugged_recently
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
   # Global variable tracking if the jack has been unplugged touched.
   - id: jack_unplugged_recently
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
   # Global variable storing the first active timer
   - id: first_active_timer
     type: voice_assistant::Timer
@@ -166,7 +166,7 @@ globals:
   - id: factory_reset_requested
     type: bool
     restore_value: no
-    initial_value: 'false'
+    initial_value: "false"
 
 switch:
   # This is the master mute switch. It is exposed to Home Assistant. The user can only turn it on and off if the hardware switch is off. (The hardware switch overrides the software one)
@@ -316,8 +316,7 @@ binary_sensor:
                                             condition:
                                               and:
                                                 - switch.is_off: master_mute_switch
-                                                - not:
-                                                    voice_assistant.is_running
+                                                - not: voice_assistant.is_running
                                             then:
                                               - script.execute:
                                                   id: play_sound
@@ -870,48 +869,48 @@ light:
           name: "Jack Plugged"
           update_interval: 40ms
           lambda: |-
-              static uint8_t index = 0;
-              if (initial_run) {
-                index = 0;
-              }
-              auto light_color = id(led_ring).current_values;
-              Color color(light_color.get_red() * 255, light_color.get_green() * 255,
-                    light_color.get_blue() * 255);
-              if (index <= 6) {
-                for (uint8_t i = 0; i < 12; i++) {
-                  if (i == index) {
-                    it[i] = color;
-                  } else if (i == (12 - index) % 12) {
-                    it[i] = color;
-                  } else {
-                    it[i] = Color::BLACK;
-                  }
+            static uint8_t index = 0;
+            if (initial_run) {
+              index = 0;
+            }
+            auto light_color = id(led_ring).current_values;
+            Color color(light_color.get_red() * 255, light_color.get_green() * 255,
+                  light_color.get_blue() * 255);
+            if (index <= 6) {
+              for (int i = 0; i < 12; i++) {
+                if (i == index) {
+                  it[i] = color;
+                } else if (i == (12 - index) % 12) {
+                  it[i] = color;
+                } else {
+                  it[i] = Color::BLACK;
                 }
               }
-              index = (index + 1);
+            }
+            index = (index + 1);
       - addressable_lambda:
           name: "Jack Unplugged"
           update_interval: 40ms
           lambda: |-
-              static uint8_t index = 0;
-              if (initial_run) {
-                index = 0;
-              }
-              auto light_color = id(led_ring).current_values;
-              Color color(light_color.get_red() * 255, light_color.get_green() * 255,
-                    light_color.get_blue() * 255);
-              if (index <= 6) {
-                for (uint8_t i = 0; i < 12; i++) {
-                  if (i == 6 - index) {
-                    it[i] = color;
-                  } else if (i == (6 + index) % 12) {
-                    it[i] = color;
-                  } else {
-                    it[i] = Color::BLACK;
-                  }
+            static uint8_t index = 0;
+            if (initial_run) {
+              index = 0;
+            }
+            auto light_color = id(led_ring).current_values;
+            Color color(light_color.get_red() * 255, light_color.get_green() * 255,
+                  light_color.get_blue() * 255);
+            if (index <= 6) {
+              for (int i = 0; i < 12; i++) {
+                if (i == 6 - index) {
+                  it[i] = color;
+                } else if (i == (6 + index) % 12) {
+                  it[i] = color;
+                } else {
+                  it[i] = Color::BLACK;
                 }
               }
-              index = (index + 1);
+            }
+            index = (index + 1);
 
   # User facing LED ring. Remapping of the internal LEDs.
   # Exposed to be used by the user.
@@ -1238,7 +1237,7 @@ script:
   - id: control_volume
     mode: restart
     parameters:
-      increase_volume: bool  # True: Increase volume / False: Decrease volume.
+      increase_volume: bool # True: Increase volume / False: Decrease volume.
     then:
       - delay: 16ms
       - if:
@@ -1260,7 +1259,7 @@ script:
   - id: control_hue
     mode: restart
     parameters:
-      increase_hue: bool  # True: Increase hue / False: Decrease hue.
+      increase_hue: bool # True: Increase hue / False: Decrease hue.
     then:
       - delay: 16ms
       - if:
@@ -1329,24 +1328,24 @@ script:
     then:
       # Turn on the repeat mode and pause for 500 ms between playlist items/repeats
       - lambda: |-
-            id(external_media_player)
-              ->make_call()
-              .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
-              .set_announcement(true)
-              .perform();
-            id(external_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 500);
+          id(external_media_player)
+            ->make_call()
+            .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
+            .set_announcement(true)
+            .perform();
+          id(external_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 500);
 
   # Script execute when the timer is done ringing, to disable repeat mode.
   - id: disable_repeat
     then:
       # Turn off the repeat mode and pause for 0 ms between playlist items/repeats
       - lambda: |-
-            id(external_media_player)
-              ->make_call()
-              .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
-              .set_announcement(true)
-              .perform();
-            id(external_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
+          id(external_media_player)
+            ->make_call()
+            .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
+            .set_announcement(true)
+            .perform();
+          id(external_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
 
   # Script executed when we want to play sounds on the device.
   - id: play_sound
@@ -1492,12 +1491,12 @@ media_player:
     volume_max: 0.85
     announcement_pipeline:
       speaker: announcement_resampling_speaker
-      format: FLAC     # FLAC is the least processor intensive codec
-      num_channels: 1  # Stereo audio is unnecessary for announcements
+      format: FLAC # FLAC is the least processor intensive codec
+      num_channels: 1 # Stereo audio is unnecessary for announcements
       sample_rate: 48000
     media_pipeline:
       speaker: media_resampling_speaker
-      format: FLAC     # FLAC is the least processor intensive codec
+      format: FLAC # FLAC is the least processor intensive codec
       num_channels: 2
       sample_rate: 48000
     on_mute:
@@ -1658,16 +1657,16 @@ select:
       lambda: |-
         if (x == "Slightly sensitive") {
           id(okay_nabu).set_probability_cutoff(217);    // 0.85 -> 0.000 FAPH on DipCo (Manifest's default)
-          id(hey_jarvis).set_probability_cutoff(247);   // 0.97 -> 0.563 FAPH on DipCo (Manifest's default)
-          id(hey_mycroft).set_probability_cutoff(253);  // 0.99 -> 0.567 FAPH on DipCo
+          id(tinkerbell).set_probability_cutoff(247);   // 0.97 -> 0.563 FAPH on DipCo (Manifest's default)
+          //id(hey_mycroft).set_probability_cutoff(253);  // 0.99 -> 0.567 FAPH on DipCo
         } else if (x == "Moderately sensitive") {
           id(okay_nabu).set_probability_cutoff(176);    // 0.69 -> 0.376 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(235);   // 0.92 -> 0.939 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(242);  // 0.95 -> 1.502 FAPH on DipCo (Manifest's default)
+          id(tinkerbell).set_probability_cutoff(235);   // 0.92 -> 0.939 FAPH on DipCo
+          //id(hey_mycroft).set_probability_cutoff(242);  // 0.95 -> 1.502 FAPH on DipCo (Manifest's default)
         } else if (x == "Very sensitive") {
           id(okay_nabu).set_probability_cutoff(143);    // 0.56 -> 0.751 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(212);   // 0.83 -> 1.502 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(237);  // 0.93 -> 1.878 FAPH on DipCo
+          id(tinkerbell).set_probability_cutoff(212);   // 0.83 -> 1.502 FAPH on DipCo
+          //id(hey_mycroft).set_probability_cutoff(237);  // 0.93 -> 1.878 FAPH on DipCo
         }
 
 voice_assistant:
@@ -1715,8 +1714,8 @@ voice_assistant:
   on_start:
     - mixer_speaker.apply_ducking:
         id: media_mixing_input
-        decibel_reduction: 20  # Number of dB quieter; higher implies more quiet, 0 implies full volume
-        duration: 0.0s         # The duration of the transition (default is no transition)
+        decibel_reduction: 20 # Number of dB quieter; higher implies more quiet, 0 implies full volume
+        duration: 0.0s # The duration of the transition (default is no transition)
   on_listening:
     - lambda: id(voice_assistant_phase) = ${voice_assist_waiting_for_command_phase_id};
     - script.execute: control_leds
