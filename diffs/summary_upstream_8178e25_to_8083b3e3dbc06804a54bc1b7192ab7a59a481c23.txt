@@ -1,0 +1,4 @@
+M	.github/workflows/build.yml
+M	.github/workflows/gh-pages.yml
+M	.github/workflows/yaml-lint.yml
+M	home-assistant-voice.yaml
