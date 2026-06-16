@@ -1,0 +1,88 @@
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..cf2b7c9
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,37 @@
++# Repository Guidelines
++
++## Project Structure & Module Organization
++- Root YAML configs: `home-assistant-voice.yaml` (main), `home-assistant-voice.factory.yaml`, `home-assistant-voice.8mb.yaml`, `voice-kit.yaml`.
++- Custom ESPHome component: `esphome/components/voice_kit/` (C++: `voice_kit.{h,cpp}`, Python codegen: `__init__.py`).
++- Modules and includes: `modules/*.yaml` (e.g., `grove-i2c.yaml`, `grove-power.yaml`).
++- Assets: `sounds/` and `static/`. CI workflows: `.github/workflows/`.
++
++## Build, Test, and Development Commands
++- Validate config: `esphome config home-assistant-voice.yaml` — schema and deps check.
++- Compile firmware: `esphome compile home-assistant-voice.yaml`.
++- Flash/run (USB/Web): `esphome run home-assistant-voice.yaml`.
++- Docker alternative: `docker run --rm -v "$PWD":/config ghcr.io/esphome/esphome compile home-assistant-voice.yaml`.
++- YAML lint: `yamllint --strict .` (uses `.yamllint`).
++- Format C++: `clang-format -i esphome/components/voice_kit/*.{h,cpp}` (style in `.clang-format`).
++
++## Coding Style & Naming Conventions
++- YAML: 2-space indent, one blank line max between blocks; IDs and substitutions use `snake_case` (e.g., `voice_assistant_phase`).
++- C++: follow `.clang-format`; member variables use trailing `_` (e.g., `firmware_bin_`), functions `lower_snake_case`, constants `UPPER_SNAKE_CASE`.
++- Python (codegen): prefer Black-compatible style; keep minimal logic and validate via `esphome` build.
++- File names: hyphenated for top-level YAML, `snake_case` for module YAML.
++
++## Testing Guidelines
++- No unit tests; use compile/flash cycle and device logs for verification.
++- Before PRs: run `esphome config`, `esphome compile`, and `yamllint --strict .`.
++- Add small, reviewable YAML modules under `modules/` when isolating changes.
++
++## Commit & Pull Request Guidelines
++- Commits: imperative mood, concise summary; reference PR/issue when applicable (e.g., “Enable IPv6 support (#394)”).
++- PRs must include: purpose, summary of changes, test steps (commands + expected device behavior), and any UI/LED/audio changes.
++- Keep PRs focused; update `README.md` or comments when behavior changes.
++
++## Security & Configuration Tips
++- Do not commit secrets (Wi‑Fi SSIDs/passwords). Prefer installer flows or `substitutions` with safe defaults.
++- Avoid logging sensitive data; keep `logger:` levels appropriate.
++- Verify firmware URLs and checksums when touching `voice_kit` DFU settings in `__init__.py`.
++
+diff --git a/README.md b/README.md
+index c06bd6a..867fc8d 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,23 @@ This is the ESPHome source code of the [Home Assistant Voice: Preview Edition](h
+ See [the documentation](https://voice-pe.home-assistant.io/) for set up and troubleshooting.
+ 
+ If you need to re-install the firmware, [use this installer](https://esphome.github.io/home-assistant-voice-pe/).
++
++## Fork Information
++
++This repository is a fork of the upstream project:
++
++- Upstream: https://github.com/esphome/home-assistant-voice-pe
++- This fork: https://github.com/Jayson-Stangel/home-assistant-voice-te
++
++Purpose: maintain local tweaks (e.g., custom micro_wake_word models) and experiments while tracking upstream closely. Please open core issues upstream unless specific to this fork.
++
++### Keeping the fork in sync
++
++```
++git fetch upstream
++git checkout dev
++git rebase upstream/dev
++git push origin dev --force-with-lease
++```
++
++CI in this fork mirrors upstream and builds from `dev`.
+diff --git a/home-assistant-voice.yaml b/home-assistant-voice.yaml
+index ad20e49..469f387 100644
+--- a/home-assistant-voice.yaml
++++ b/home-assistant-voice.yaml
+@@ -1592,10 +1592,8 @@ micro_wake_word:
+   models:
+     - model: https://github.com/kahrendt/microWakeWord/releases/download/okay_nabu_20241226.3/okay_nabu.json
+       id: okay_nabu
+-    - model: hey_jarvis
+-      id: hey_jarvis
+-    - model: hey_mycroft
+-      id: hey_mycroft
++    - model: github://Jayson-Stangel/microWakeWord_models/tinkerbell/v0/model_output/tinkerbell.json
++      id: tinkerbell
+     - model: https://github.com/kahrendt/microWakeWord/releases/download/stop/stop.json
+       id: stop
+       internal: true
